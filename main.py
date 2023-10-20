@@ -1,23 +1,28 @@
-from algorithms import IAlgorithm, EffectiveTicketPrice, Greedy
+from algorithms import IAlgorithm, EffectiveTicketPrice, Greedy, BuyWheneverP_iLessThanH_i, ExpectedPrice
 from models import Instance, Day
 from typing import Dict
 
 import sys
 
 def main():
+    # Configure
     algorithms: Dict[str, IAlgorithm] = {
         "OPT": EffectiveTicketPrice(),
         "Greedy online": Greedy(),
+        "Buy Whenver P_i < H_i with Cumalative Hotel Cost Constraint": BuyWheneverP_iLessThanH_i(),
+        "Expected Price": ExpectedPrice()
     }
     
+    # Do Stuff
     instance = parse_input()
-    
-    opt_schedule = algorithms["OPT"].run(instance)
-    greedy_schedule = algorithms["Greedy online"].run(instance)
-    
-    print(opt_schedule.pretty_string())
-    print("-------------------------------------------------------------------")
-    print(greedy_schedule.pretty_string())
+
+    for name, algorithm in algorithms.items():
+        print("".join(["-"] * 80))
+        print(name)
+        
+        schedule = algorithm.run(instance)
+        print(schedule.pretty_string())
+    print("".join(["-"] * 80))
 
 def parse_input() -> Instance:
     n = int(sys.stdin.readline())
