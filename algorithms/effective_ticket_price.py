@@ -1,57 +1,37 @@
-from dataclasses import dataclass
-import sys
+from .algorithm import IAlgorithm
+from models import Day, Decision, Instance, Schedule
+from typing import List
 
-@dataclass
-class Entry:
-  day: int; seats: int; price: int; hotel: int; cost: int
+class EffectiveTicketPrice(IAlgorithm):
+    def run(self, instance: Instance) -> Schedule:
+        effective_ticket_prices = self._compute_effective_ticket_prices(instance.m, instance.days)
+        sorted_effective_ticket_prices = sorted(effective_ticket_prices, key=lambda day: day.p_i)
 
-def read_input() -> tuple[int, int, list[Entry]]:
-  n = int(sys.stdin.readline())
-  m = int(sys.stdin.readline())
+        flying = [0] * instance.m
+        num_people_remaining = instance.n
+        for day in sorted_effective_ticket_prices:
+            tickets = min(day.s_i, num_people_remaining)
+            flying[day.i] = tickets
+            num_people_remaining -= tickets
+            if num_people_remaining == 0: break
+ 
+        schedule: Schedule = Schedule(instance)
+        num_people_remaining = instance.n
+        for flys_today in flying:
+            num_people_remaining -= flys_today
+            schedule.decisions.append(Decision(flys_today, num_people_remaining))
+            if num_people_remaining == 0: break
 
-  entries : list[Entry] = []
-  acc_hotel_cost = 0
+        return schedule
 
-  for i in range(m):
-    line = sys.stdin.readline()
-    [s, p, h] = [int(x) for x in line.split(",")]
-    cost = p + acc_hotel_cost
-    entries.append(Entry(i, s, p, h, cost))
-    acc_hotel_cost += h
+    def _compute_effective_ticket_prices(self, m: int, days: List[Day]) -> List[Day]:
+        # Copy to avoid mutating the original instance
+        effective_ticket_prices: List[Day] = days.copy()
+        
+        accumlative_hotel_cost: int = 0
+        for i in range(m):
+            effective_price = days[i].p_i + accumlative_hotel_cost
+            effective_ticket_prices[i].p_i = effective_price
+        
+        return effective_ticket_prices
 
-  return (n, m, entries)
-
-Schedule = tuple[int, int] # flying, staying
-
-def generate_schedule(n: int, m: int, entries: list[Entry]) -> list[Schedule]:
-  sorted_entries = sorted(entries, key=lambda e: e.cost) # sort by effective cost (last entry)
-  flying = [0] * m
-  num_people = n
-  for entry in sorted_entries:
-    tickets = min(entry.seats, num_people)
-    flying[entry.day] = tickets
-    num_people -= tickets
-    if num_people == 0: break
-
-  num_people = n
-  schedules : list[Schedule] = []
-  for f in flying:
-    num_people -= f
-    schedules.append((f, num_people))
-    if num_people == 0: break
-
-  return schedules
-
-def calc_schedule_cost (schedules: list[Schedule], entries: list[Entry]) -> int :
-  return sum([
-      flying * e.price + staying * e.hotel
-      for ((flying, staying), e) in zip(schedules, entries)
-    ])
-
-(n, m, entries) = read_input()
-sched = generate_schedule(n, m, entries)
-
-for (f, s) in sched:
-  print(str(f) + ", " + str(s))
-
-print(calc_schedule_cost(sched, entries))

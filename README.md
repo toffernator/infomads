@@ -1,3 +1,7 @@
 # INFOMADS
 
-Running: `python3 offline.py < examples/test.in`
+Running:
+
+```sh
+python3 main.py < examples/test.in
+```
