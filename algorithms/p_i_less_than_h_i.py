@@ -9,10 +9,13 @@ class BuyWheneverP_iLessThanH_i(IAlgorithm):
         flying = [0] * instance.m
         cumulative = 0
         for i, day in enumerate(instance.days):
-            if cumulative > day.p_i or day.p_i < day.h_i :
+            if cumulative > day.p_i or day.p_i < day.h_i or i+1 == instance.m:
                 flying[i] = min(day.s_i, num_people_remaining)
                 num_people_remaining -= flying[i]
-
+            
+            if num_people_remaining == 0:
+                break
+            
             cumulative += day.h_i
 
         
