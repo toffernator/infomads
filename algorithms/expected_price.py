@@ -1,5 +1,5 @@
 from algorithms import IAlgorithm, EffectiveTicketPrice
-from models import Instance, Schedule
+from models import Instance, Schedule, Decision
 import copy
 
 class ExpectedPrice(IAlgorithm):
@@ -14,12 +14,18 @@ class ExpectedPrice(IAlgorithm):
             expectedDays[i].h_i = expectedDays[0].h_i
             expectedDays[i].s_i = expectedDays[0].s_i
             
-        for i in range(instance.m):
+        for i in range(instance.m-1):
             expectedDays = self._update_avg(expectedDays, instance, i)
 
             s = EffectiveTicketPrice().run(Instance(instance.n, instance.m, expectedDays))
-            schedule.decisions.append(s.decisions[i])
+            schedule.decisions.append(s.decisions[0])
 
+            instance.n -= s.decisions[0].flying
+            if instance.n == 0: break
+
+        if instance.n != 0:
+            schedule.decisions.append(Decision(instance.n, 0))
+            
         return schedule
 
     def _update_avg(self, exp_days, inst, d):
