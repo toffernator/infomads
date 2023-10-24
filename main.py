@@ -1,41 +1,56 @@
-from algorithms import IAlgorithm, EffectiveTicketPrice, Greedy, BuyWheneverP_iLessThanH_i, ExpectedPrice
-from models import Instance, Day
-from typing import Dict
-
 import sys
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from algorithms import IAlgorithm, EffectiveTicketPrice, Greedy, BuyWheneverP_iLessThanH_i, ExpectedPrice
+from models import Instance, instance_from
+from typing import Dict, Generator, List
+
+from pathlib import Path
+
+OPT: str = "opt"
+GREEDY: str = "greedy online"
+BUY_WHENEVER_P_I_LESS_THAN_H_I: str = "Buy Whenver P_i < H_i with Cumalative Hotel Cost Constraint"
+EXPECTED_PRICE: str = "expected price"
 
 def main():
     # Configure
     algorithms: Dict[str, IAlgorithm] = {
-        "OPT": EffectiveTicketPrice(),
-        "Greedy online": Greedy(),
-        "Buy Whenver P_i < H_i with Cumalative Hotel Cost Constraint": BuyWheneverP_iLessThanH_i(),
-        "Expected Price": ExpectedPrice()
+        OPT: EffectiveTicketPrice(),
+        GREEDY: Greedy(),
+        BUY_WHENEVER_P_I_LESS_THAN_H_I: BuyWheneverP_iLessThanH_i(),
+        EXPECTED_PRICE: ExpectedPrice()
     }
+    examples: Path = Path(sys.argv[1])
     
     # Do Stuff
-    instance = parse_input()
+    instances: Generator[Instance, None, None] = (
+            instance_from(input) for input in examples.glob("**/*.in")
+    )
+    
+    results: Dict[str, List[float]] = {
+        OPT: [],
+        GREEDY: [],
+        BUY_WHENEVER_P_I_LESS_THAN_H_I: [],
+        EXPECTED_PRICE: []
+    }
+    for instance in instances:
+        opt_cost = algorithms[OPT].run(instance).cost()
+        for name, algorithm in algorithms.items():
+            alg_cost = algorithm.run(instance).cost()
+            instance_ratio =  alg_cost / opt_cost
+            results[name].append(instance_ratio)
+    
+    averages: Dict[str, float] = {
+        OPT: (sum(results[OPT]) / len(results[OPT])),
+        GREEDY: (sum(results[GREEDY]) / len(results[GREEDY])),
+        BUY_WHENEVER_P_I_LESS_THAN_H_I: (sum(results[BUY_WHENEVER_P_I_LESS_THAN_H_I]) / len(results[BUY_WHENEVER_P_I_LESS_THAN_H_I])),
+        EXPECTED_PRICE: (sum(results[EXPECTED_PRICE]) / len(results[EXPECTED_PRICE])),
+    }
+    plt.bar(averages.keys(), averages.values())
+    plt.show()
 
-    for name, algorithm in algorithms.items():
-        print("".join(["-"] * 80))
-        print(name)
-        
-        schedule = algorithm.run(instance)
-        print(schedule.pretty_string())
-    print("".join(["-"] * 80))
-
-def parse_input() -> Instance:
-    n = int(sys.stdin.readline())
-    m = int(sys.stdin.readline())
-
-    days : list[Day] = []
-    for i in range(m):
-        line = sys.stdin.readline()
-        # This line is likely to fail if the input is malformed
-        [s_i, p_i, h_i] = [int(x) for x in line.split(",")]
-        days.append(Day(i, s_i , p_i, h_i))
-
-    return Instance(n, m, days)
 
 if __name__ == "__main__":
     main()
