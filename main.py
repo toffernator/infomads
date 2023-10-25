@@ -1,6 +1,5 @@
 import sys
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from algorithms import IAlgorithm, EffectiveTicketPrice, Greedy, BuyWheneverP_iLessThanH_i, ExpectedPrice
@@ -20,7 +19,7 @@ def main():
         OPT: EffectiveTicketPrice(),
         GREEDY: Greedy(),
         BUY_WHENEVER_P_I_LESS_THAN_H_I: BuyWheneverP_iLessThanH_i(),
-        # EXPECTED_PRICE: ExpectedPrice()
+        EXPECTED_PRICE: ExpectedPrice()
     }
     examples: Path = Path(sys.argv[1])
     
@@ -29,7 +28,7 @@ def main():
         OPT: [],
         GREEDY: [],
         BUY_WHENEVER_P_I_LESS_THAN_H_I: [],
-        # EXPECTED_PRICE: []
+        EXPECTED_PRICE: []
     }
     for instance in instances(examples):
         opt_cost = algorithms[OPT].run(instance).cost()
@@ -42,7 +41,7 @@ def main():
         OPT: (sum(results[OPT]) / len(results[OPT])),
         GREEDY: (sum(results[GREEDY]) / len(results[GREEDY])),
         BUY_WHENEVER_P_I_LESS_THAN_H_I: (sum(results[BUY_WHENEVER_P_I_LESS_THAN_H_I]) / len(results[BUY_WHENEVER_P_I_LESS_THAN_H_I])),
-        # EXPECTED_PRICE: (sum(results[EXPECTED_PRICE]) / len(results[EXPECTED_PRICE])),
+        EXPECTED_PRICE: (sum(results[EXPECTED_PRICE]) / len(results[EXPECTED_PRICE])),
     }
     plt.bar(averages.keys(), averages.values())
     plt.axhline(y=1)
