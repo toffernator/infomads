@@ -1,6 +1,7 @@
 import sys
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from algorithms import IAlgorithm, EffectiveTicketPrice, Greedy, BuyWheneverP_iLessThanH_i, ExpectedPrice
 from models import Instance, instance_from
@@ -10,7 +11,7 @@ from pathlib import Path
 
 OPT: str = "opt"
 GREEDY: str = "greedy online"
-BUY_WHENEVER_P_I_LESS_THAN_H_I: str = "Buy Whenver P_i < H_i with Cumalative Hotel Cost Constraint"
+BUY_WHENEVER_P_I_LESS_THAN_H_I: str = "buy whenever p_i < h_i with cumalative hotel cost constraint"
 EXPECTED_PRICE: str = "expected price"
 
 def main():
@@ -43,8 +44,19 @@ def main():
         BUY_WHENEVER_P_I_LESS_THAN_H_I: (sum(results[BUY_WHENEVER_P_I_LESS_THAN_H_I]) / len(results[BUY_WHENEVER_P_I_LESS_THAN_H_I])),
         EXPECTED_PRICE: (sum(results[EXPECTED_PRICE]) / len(results[EXPECTED_PRICE])),
     }
-    plt.bar(averages.keys(), averages.values())
-    plt.axhline(y=1)
+
+    viridis_map = plt.get_cmap("viridis")
+    colors = [viridis_map(i) for i in np.linspace(0, 1, len(averages))]
+    
+    plt.title("Average Competitive Ratio for the Different Algorithms Across 9320 Randomly Generated Feasible Instances", fontsize=18)
+    plt.ylabel("Average Competitive Ratio", fontsize=16)
+    plt.xlabel("Algorithm", fontsize=16)
+    plt.bar([name.title() for name in averages.keys()], averages.values(), color=colors)
+
+    # Add the values to the y-axis
+    for i, average in enumerate(averages.values()):
+        plt.text([name.title() for name in averages.keys()][i], average + 0.05, str(average), ha='center', va='bottom', fontsize=14)
+
     plt.show()
 
 def instances(p: Path) -> Generator[Instance, None, None]:
