@@ -31,6 +31,8 @@ class EffectiveTicketPrice(IAlgorithm):
         accumlative_hotel_cost: int = 0
         for i in range(m):
             effective_price = days[i].p_i + accumlative_hotel_cost
+            accumlative_hotel_cost += days[i].h_i
+
             effective_ticket_prices[i].p_i = effective_price
         
         return effective_ticket_prices
