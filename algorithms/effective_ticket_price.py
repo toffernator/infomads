@@ -1,6 +1,7 @@
 from .algorithm import IAlgorithm
 from models import Day, Decision, Instance, Schedule
 from typing import List
+from copy import deepcopy
 
 class EffectiveTicketPrice(IAlgorithm):
     def run(self, instance: Instance) -> Schedule:
@@ -25,14 +26,15 @@ class EffectiveTicketPrice(IAlgorithm):
         return schedule
 
     def _compute_effective_ticket_prices(self, m: int, days: List[Day]) -> List[Day]:
-        # Copy to avoid mutating the original instance
-        effective_ticket_prices: List[Day] = days.copy()
+        # deepcopy to avoid mutating the original instance, because even if 
+        # copying the list each Day instance in days is still a shared instance
+        effective_ticket_prices: List[Day] = deepcopy(days)
         
         accumlative_hotel_cost: int = 0
         for i in range(m):
             effective_price = days[i].p_i + accumlative_hotel_cost
             accumlative_hotel_cost += days[i].h_i
-
+            
             effective_ticket_prices[i].p_i = effective_price
         
         return effective_ticket_prices
