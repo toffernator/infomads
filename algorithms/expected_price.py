@@ -8,26 +8,25 @@ class ExpectedPrice(IAlgorithm):
         expectedDays: List[instance.m] = copy.deepcopy(instance.days)
         schedule: Schedule = Schedule(instance)
         n = instance.n
-        m = instance.m
 
-        for i in range(m):
+        for i in range(instance.m):
             #start with the first day as "average"
             expectedDays[i].p_i = expectedDays[0].p_i
             expectedDays[i].h_i = expectedDays[0].h_i
             expectedDays[i].s_i = expectedDays[0].s_i
-            
+
         for i in range(instance.m-1):
             expectedDays = self._update_avg(expectedDays, instance, i)
 
-            s = EffectiveTicketPrice().run(Instance(instance.n, instance.m, expectedDays))
+            s = EffectiveTicketPrice().run(Instance(n, instance.m, expectedDays, ""))
             schedule.decisions.append(s.decisions[0])
 
             n -= s.decisions[0].flying
             if n == 0: break
 
-        if n > 0:
+        if n != 0:
             schedule.decisions.append(Decision(n, 0))
-            
+
         return schedule
 
     def _update_avg(self, exp_days, inst, d):
