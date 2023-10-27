@@ -23,7 +23,7 @@ def main():
         EXPECTED_PRICE: ExpectedPrice()
     }
     examples: Path = Path(sys.argv[1])
-    
+
     # Do Stuff
     results: Dict[str, List[float]] = {
         OPT: [],
@@ -31,13 +31,15 @@ def main():
         BUY_WHENEVER_P_I_LESS_THAN_H_I: [],
         EXPECTED_PRICE: []
     }
-    for instance in instances(examples):
+    for (i, instance) in enumerate(instances(examples)):
         opt_cost = algorithms[OPT].run(instance).cost()
+        print("Instance #" + str(i), instance.name)
         for name, algorithm in algorithms.items():
             alg_cost = algorithm.run(instance).cost()
-            instance_ratio =  alg_cost / opt_cost
+            instance_ratio =  round(alg_cost / opt_cost, 3)
             results[name].append(instance_ratio)
-    
+            print("{}: {} ({})".format(name, alg_cost, instance_ratio))
+
     averages: Dict[str, float] = {
         OPT: (sum(results[OPT]) / len(results[OPT])),
         GREEDY: (sum(results[GREEDY]) / len(results[GREEDY])),
@@ -47,7 +49,7 @@ def main():
 
     viridis_map = plt.get_cmap("viridis")
     colors = [viridis_map(i) for i in np.linspace(0, 1, len(averages))]
-    
+
     plt.title("Average Competitive Ratio for the Different Algorithms Across 9320 Randomly Generated Feasible Instances", fontsize=18)
     plt.ylabel("Average Competitive Ratio", fontsize=16)
     plt.xlabel("Algorithm", fontsize=16)
